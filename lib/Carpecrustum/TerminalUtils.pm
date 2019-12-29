@@ -46,10 +46,10 @@ Perhaps a little code snippet.
 
 Create a C<Terminal_Utils> object.
 
-If called from a test (.t) file, then $self->{testing}
+If called from a test (.t) file, then C<$self->{testing}>
 is set to true, and all of the output will be written
 into an array of strings rather than going to the screen
-and $self->get_screen() will return the array for testing.
+and C<$self->get_screen()> will return the array for testing.
 
 Parameters:
    $debug - 
@@ -88,7 +88,7 @@ sub is_test {
 
 =head2 $self->reset_screen()
 
-TODO
+Clears the screen buffer.
 
 =cut
 
@@ -116,17 +116,35 @@ sub get_screen {
 }
 
 
+=head2 $self->width()
+
+Returns the number of columns.
+
+=cut
+
 sub width {
     my $self = shift;
     return $self->{columns};
 }
 
 
+=head2 $self->height()
+
+Returns the number of rows.
+
+=cut
+
 sub height {
     my $self = shift;
     return $self->{rows};
 }
 
+
+=head2 $self->test_grid()
+
+Draws a coordinate grid across the top and down the left side of the window.
+
+=cut
 
 sub test_grid {
     my $self = shift;
@@ -149,6 +167,13 @@ sub test_grid {
 }
     
 
+
+=head2 $self->home()
+
+Clears the screen. 
+If this is being used by a test, that it also resets the screen buffer and test grid.
+
+=cut
 
 sub home {
     my $self = shift;
@@ -217,10 +242,24 @@ sub line {
 }
    
 
+=head2 $self->is_debugging 
+
+Returns the C<debug> flag.
+
+=cut
+
 sub is_debugging {
     my $self = shift;
     return $self->{debug};
 } 
+
+
+=head2 $self->title_box( $x, $y, $width, $height)
+
+Draws a box with a title bar.
+Must be more that 5 rows high.
+
+=cut
 
 sub title_box {
     my $self = shift;
@@ -240,7 +279,13 @@ sub title_box {
     $self->line ($mid_line, $x, $y + 2);
 }
 
-    
+
+=head2 $self->box( $x, $y, $width, $height)
+
+Draws a box with a title bar.
+
+=cut
+
 sub box {
     my $self = shift;
     my $x = shift; # coordinate of top left
@@ -322,6 +367,15 @@ sub _initialize_terminal {
     return;
 }
 
+
+=head2 $self->menu
+
+Draws a menu on the screen, enclosed in a box.
+
+TODO: add descriptions of options
+
+=cut
+
 sub menu {
     my $self = shift;
     my $options = shift;
@@ -367,6 +421,12 @@ sub menu {
     }
     return $list[$choice];
 }
+
+
+=head2 $self->get_key
+
+
+=cut
 
 sub get_key {
     my $self = shift;
