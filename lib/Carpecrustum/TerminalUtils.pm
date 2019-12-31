@@ -346,24 +346,9 @@ sub _initialize_terminal {
     my $termios = POSIX::Termios->new();
     $termios->getattr;
     my $ospeed = $termios->getospeed;
-    # Old-style ioctl code to get ospeed:
-    #     require 'ioctl.pl';
-    #     ioctl(TTY,$TIOCGETP,$sgtty);
-    #     ($ispeed,$ospeed) = unpack('cc',$sgtty);
-    # allocate and initialize a terminal structure
-    #$terminal = Tgetent Term::Cap { TERM => undef, OSPEED => $ospeed };
-    # require certain capabilities to be available
-    #$terminal->Trequire(qw/ce ku kd/);
 
     $self->{terminal} = Term::Cap->Tgetent({ TERM => undef, OSPEED => $ospeed });
     $self->{terminal}->Trequire(qw/ce ku kd/);
-    if (0) {
-        home();
-        print $self->{terminal}->Tgoto("cm", 0, 0);
-        print join (' ' x 9, (0 .. 7)); # "0         1         2         3         4";
-        print $self->{terminal}->Tgoto("cm", 0, 1);
-        print "" . ("0123456789" x 7 ) . "0"; #0123456789012345678901234567890";
-    }
     return;
 }
 
