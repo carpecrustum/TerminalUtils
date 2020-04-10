@@ -1,34 +1,55 @@
 #!/usr/local/ActivePerl-5.24/bin/perl
 use strict;
+use utf8;
 use Devel::Symdump;
-use Test::More tests => 7;
+use Test::More;
+use Test::MockModule;
 use Test::Deep;
 use Carp::Assert;
 use Carp::Assert::More;
-use Carpecrustum::TerminalUtils;
-use utf8;
+
+my $module = 'Carpecrustum::TerminalUtils';
+use_ok ($module);
+
+package Carpecrustum::TerminalUtilsTest;
+use parent 'Carpecrustum::TerminalUtils';
+
+
+package main;
+
+run_tests();
+# run_tests([&test_title_box, &test_menu]);
+exit 0;
 
 sub run_tests {
-    ## looks for any function named test_*
-    # so that I don't have one long inline flow of test cases
-    # and I don't need to remember to call them in a main()
-    # of some kind.
+    my $term = Carpecrustum::TerminalUtilsTest->new();
+    if (($term->width() == 100) && ($term->height() == 48)) {
+        plan tests => 8;
 
-    my @function_list =  shift // Devel::Symdump->functions();
-    foreach my $function (@function_list) {
-        if ( $function =~ /^main::test_/ ) {
-            ## no critic
-            no strict 'refs';    # violates 'Stricture disabled'
-            $function->();
-            ## use critic
+        ## looks for any function named test_*
+        # so that I don't have one long inline flow of test cases
+        # and I don't need to remember to call them in a main()
+        # of some kind.
+
+        my @function_list =  shift // Devel::Symdump->functions();
+        foreach my $function (@function_list) {
+            if ( $function =~ /^main::test_/ ) {
+                ## no critic
+                no strict 'refs';    # violates 'Stricture disabled'
+                $function->();
+                ## use critic
+            }
         }
     }
+    else {
+        plan skip_all => 'These tests must run in a 100x48 terminal window.';
+    };
     done_testing();
 }
 
 
 sub test_dimensions {
-    my $term = Carpecrustum::TerminalUtils->new();
+    my $term = Carpecrustum::TerminalUtilsTest->new();
     return subtest dimensions => sub {
         plan tests => 2;
         is ($term->width(), 100, "Width is correct");
@@ -37,7 +58,7 @@ sub test_dimensions {
 }
 
 sub test_get_screen {
-    my $term = Carpecrustum::TerminalUtils->new();
+    my $term = Carpecrustum::TerminalUtilsTest->new();
     my @screen_lines = $term->get_screen();
     my $expected_lines = 48;
     my $actual_lines = scalar @screen_lines;
@@ -48,7 +69,7 @@ sub test_get_screen {
 sub test_reset_screen {
     return subtest reset_screen => sub {
         plan tests => 48;
-        my $term = Carpecrustum::TerminalUtils->new();
+        my $term = Carpecrustum::TerminalUtilsTest->new();
         $term->reset_screen();
         my @screen_lines = $term->get_screen();
         foreach my $line (1 .. $#screen_lines + 1) {
@@ -79,7 +100,7 @@ sub _blank_screen {
 sub test_menu {
     return subtest menu => sub {
         plan tests => 2;
-        my $term = Carpecrustum::TerminalUtils->new();
+        my $term = Carpecrustum::TerminalUtilsTest->new();
         my $x = 38;
         my $y = 3;
         my $len = 24;
@@ -123,7 +144,7 @@ IMAGE
 sub test_title_box {
     return subtest title_box => sub {
         plan tests => 1;
-        my $term = Carpecrustum::TerminalUtils->new();
+        my $term = Carpecrustum::TerminalUtilsTest->new();
         
         my @expected = _blank_screen();
         my $base_x = 5;
@@ -153,7 +174,7 @@ IMAGE
 sub test_draw_box {
     return subtest draw_box => sub {
         plan tests => 8;
-        my $term = Carpecrustum::TerminalUtils->new();
+        my $term = Carpecrustum::TerminalUtilsTest->new();
     
         # test normal box
         my $x = 6;
@@ -233,10 +254,6 @@ IMAGE
         array_is(\@actual, \@expected, "no box drawn - right is out of bounds");
     };
 }
-
-run_tests();
-# run_tests([&test_title_box, &test_menu]);
-exit 0;
 
 sub array_is {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
