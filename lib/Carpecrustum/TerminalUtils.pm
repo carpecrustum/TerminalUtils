@@ -26,7 +26,7 @@ Version 0.01
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 
 =head1 SYNOPSIS
@@ -398,8 +398,14 @@ sub menu {
             elsif ($key eq "UPARROW" || $key eq "LEFTARROW") {
                 $pos = ($pos == 0) ? $#list : $pos - 1;
             }
+            elsif ($key eq "PAGEUP") {
+                $pos = ($pos == 0) ? $#list : $pos - 1;
+            }
             elsif ($key eq "DOWNARROW" || $key eq "RIGHTARROW") {
                 $pos = ($pos == $#list) ? 0 : $pos + 1;   
+            }
+            elsif ($key eq "PAGEDOWN") {
+                $pos = ($pos == $#list) ? $pos : $pos + 1;
             }
         }
         $self->line("User chose: $list[$choice]", 1, 24) if ($self->is_debugging());
@@ -410,6 +416,16 @@ sub menu {
 
 =head2 $self->get_key
 
+Returns the next key entered.
+Window size changes are given priority over keystrokes.
+
+Special cases are:
+    BACKSPACE
+    ENTER
+    DOWN_ARROW
+    LEFT_ARROW
+    RIGHT_ARROW
+    UP_ARROW
 
 =cut
 
@@ -421,6 +437,38 @@ sub get_key {
 }
 
 
+=head2 $self->ask_at($x, $y, $max)
+
+Positions the cursor at C<$x>, C<$y> and waits for
+input of up to C<$max> characters.
+
+=cut
+
+sub ask_at {
+    my $self = shift;
+    my $x = shift; # coordinate of top left
+    my $y = shift;
+    my $max = shift;
+
+    $self->line('-' x $max, $x, $y);
+
+    my $data = "";
+    while (1) {
+        my $key = $self->get_key();
+        last if ($key eq 'ENTER');
+        if ($key eq 'BACKSPACE') {
+            if (length($data) > 0) {
+                $data = substr($data, 0, length($data) - 1);
+                $self->line("$data ", $x, $y);
+            }
+        }
+        elsif (($key !~ /.+ARROW$/) && (length($data) < $max)) {
+            $data .= $key;
+            $self->line($data, $x, $y);
+        }
+    }
+    return $data;
+}
 
 
 =head1 AUTHOR
