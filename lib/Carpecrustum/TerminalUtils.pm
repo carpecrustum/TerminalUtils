@@ -11,6 +11,7 @@ use Term::ReadKey;
 use Term::RawInput;
 use Time::HiRes;
 use Carp::Assert;
+use JSON;
 
 =head1 NAME
 
@@ -70,6 +71,7 @@ sub new {
     $self->reset_screen();
     $self->{debug} = $debug;
     $self->{testing} = $filename =~ /\.t$/;
+    $self->{stack} = [];
     return $self;
 }
 
@@ -314,27 +316,16 @@ sub box {
     }
 
     my $side_width = $width - 2;
-    my $white_width = $width + 2;
 
     my $top      = $corner_1 . ($horiz x $side_width) . $corner_2;
     my $mid_gap  = $vert     . (" "    x $side_width) . $vert;
     my $mid_line = $left_mid . ($horiz x $side_width) . $right_mid;
     my $bot      = $corner_3 . ($horiz x $side_width) . $corner_4;
-    my $white    = " " x $white_width;
-
-    my $top_white = ($y == 1) ? $y : $y - 1;
-    my $bottom_white = (($y + $height) == $self->height()) ? $y + $height : $y + $height + 1;
-
-    for my $y ($top_white .. $bottom_white) {
-        $self->line ($white, $x - 1, $y);
-    }
 
     $self->line($top, $x, $y);
     for my $offset (1 .. $height - 2) {
-        $self->line($vert, $x, $y + $offset);
-        $self->line($vert, $x + $side_width + 1, $y + $offset);
+        $self->line($mid_gap, $x, $y + $offset);
     }
-
     $self->line($bot, $x, $y + $height - 1);
 }
 
@@ -468,6 +459,45 @@ sub ask_at {
         }
     }
     return $data;
+}
+
+
+=head2 $self->push_screen()
+
+Saves the current screen on a stack, so that
+it can be redrawn after a menu selection has
+been completed.
+
+=cut
+
+sub push_screen {
+    my $self = shift;
+    my $json = encode_json( $self->{screen} );
+    push @{$self->{stack}}, $json;
+    return;
+}
+
+
+=head2 $self->pop_screen()
+
+Restores the current screen from a stack, so that
+it can revert to the screen before a menu was drawn.
+
+=cut
+
+sub pop_screen {
+    my $self = shift;
+    my $frames = scalar(@{$self->{stack}});
+    
+    if ($frames > 0) {
+        my $j = pop @{$self->{stack}};
+        my $s = decode_json($j);
+        my $y = 1;
+        foreach my $r (@$s) {
+            $self->line($r, 1, $y++);
+        }
+    }
+    return;
 }
 
 

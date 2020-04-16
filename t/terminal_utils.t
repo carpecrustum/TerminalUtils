@@ -2,17 +2,113 @@
 use strict;
 use utf8;
 use Devel::Symdump;
-use Test::More;
+use Test::More tests => 9;
 use Test::MockModule;
 use Test::Deep;
 use Carp::Assert;
 use Carp::Assert::More;
+use JSON;
 
 my $module = 'Carpecrustum::TerminalUtils';
 use_ok ($module);
 
 package Carpecrustum::TerminalUtilsTest;
 use parent 'Carpecrustum::TerminalUtils';
+
+sub _show_stack {
+     my $self = shift;
+    my $frames = scalar(@{$self->{stack}});
+    if ($frames == 0) {
+        print STDERR "\n# Stack is empty\n";
+    }
+    else {
+        print STDERR "\n# Stack has $frames frames.\n";
+        foreach my $f (1 .. $frames) {
+            my $sf = JSON::decode_json($self->{stack}->[$f - 1]);
+            print STDERR "# ===================== Stack Frame #$f ==========================\n";
+            my $last_line = 48;
+            foreach my $row (reverse 1 .. 48) {
+                if ($sf->[$row -1] !~ /^ +$/) {
+                    $last_line = $row;
+                    last;
+                }
+            }
+            foreach my $row (1 .. $last_line) {
+                printf STDERR "# [%2d] %s\n", $row, $sf->[$row - 1];
+            }
+            if ($last_line != 48) {
+                print STDERR "\n";
+                $last_line++;
+                print STDERR "# Lines $last_line through 48 are blank\n";
+                print STDERR "\n";
+            }
+        }
+        print STDERR "# ==============================================================\n";
+    }
+}
+
+sub _sample_text {
+    my $self = shift;
+    my $x = shift;
+    my $y = shift;
+    my $paragraph = shift;
+
+    my $text = [
+        [
+            'Computerwocky (With apologies to Lewis Carroll) ',
+            '(by John P. Dominik) ',
+        ],
+        [
+            'Twas digital, and the binary bits',
+            '    did gire and gimbole in the core',
+            'All mimsy were the registers, ',
+            '    and the mainframe outbore. ',
+        ],
+        [
+            'Beware the Computerwock, My son ',
+            '    the bugs in bytes, the cards that patch ',
+            'Beware the GIGO bird, and shun',
+            '    the fumrirous bandersnatch ',
+        ],
+        [
+            'He took his on line Pen in hand! ',
+            '    long time the mini-max he sought',
+            'So rested he by the logic tree,',
+            '    and programmed it in through. ',
+        ],
+        [
+            'And as in uffish thought he stood ',
+            '    the computer wock, with console lights, ',
+            'Came wiffling through the I/O queue, ',
+            '    and burbled bits to bytes! ',
+        ],
+        [
+            'One! Two! and through and through, ',
+            '    the input pen went snicker snack',
+            'He left it dead, its dump unread, ',
+            '    and went galumphing back. ',
+        ],
+        [
+            'And hast thou slain the Computerwock, my son ',
+            '    come into my arms, my beamish boy!',
+            'Oh fabulous day! I/O! Overlay! ',
+            '    he chortled in his joy. ',
+        ],
+        [
+            'Twas digital, and the binary bits',
+            '    did gire and gimbole in the core',
+            'All mimsy were the registers, ',
+            '    and the mainframe outbore. ',
+        ],
+        [
+            '(The light pen is mighter than the Vorpal Sword)',
+        ],
+    ];
+    foreach my $line (@{$text->[$paragraph]}) {
+        $self->line($line, $x, $y++);
+    }
+    return;
+}
 
 
 package main;
@@ -22,28 +118,20 @@ run_tests();
 exit 0;
 
 sub run_tests {
-    my $term = Carpecrustum::TerminalUtilsTest->new();
-    if (($term->width() == 100) && ($term->height() == 48)) {
-        plan tests => 8;
+    ## looks for any function named test_*
+    # so that I don't have one long inline flow of test cases
+    # and I don't need to remember to call them in a main()
+    # of some kind.
 
-        ## looks for any function named test_*
-        # so that I don't have one long inline flow of test cases
-        # and I don't need to remember to call them in a main()
-        # of some kind.
-
-        my @function_list =  shift // Devel::Symdump->functions();
-        foreach my $function (@function_list) {
-            if ( $function =~ /^main::test_/ ) {
-                ## no critic
-                no strict 'refs';    # violates 'Stricture disabled'
-                $function->();
-                ## use critic
-            }
+    my @function_list =  shift // Devel::Symdump->functions();
+    foreach my $function (@function_list) {
+        if ( $function =~ /^main::test_/ ) {
+            ## no critic
+            no strict 'refs';    # violates 'Stricture disabled'
+            $function->();
+            ## use critic
         }
     }
-    else {
-        plan skip_all => 'These tests must run in a 100x48 terminal window.';
-    };
     done_testing();
 }
 
@@ -255,6 +343,67 @@ IMAGE
     };
 }
 
+
+sub test_push_pop {
+    return subtest draw_box => sub {
+        plan tests => 4;
+        my $term = Carpecrustum::TerminalUtilsTest->new();
+       
+        $term->_show_stack(); 
+        # popping an empty stack returns a blank screen
+        $term->_sample_text( 2, 2, 0);
+        $term->_sample_text( 2, 5, 1);
+        my @actual = $term->get_screen();
+
+my $image = <<TEXT;
+Computerwocky (With apologies to Lewis Carroll) 
+(by John P. Dominik) 
+
+Twas digital, and the binary bits
+    did gire and gimbole in the core
+All mimsy were the registers, 
+    and the mainframe outbore. 
+TEXT
+
+        my @expected = _blank_screen();             # start with blank screen
+        add_to_screen( 2, 2, \@expected, $image );  # draw the text block into the expected screen
+        my @actual = $term->get_screen();           # retrieve the screend data
+        array_is(\@actual, \@expected, "text was drawn correctly");
+
+        $term->pop_screen();
+        array_is(\@actual, \@expected, "screen not changed by unpaired pop_screen");
+
+        $term->push_screen();       
+
+        # stash the current screen for the next result
+        my @saved_screen = $term->get_screen();
+    
+        $term->_show_stack(); 
+
+        # add another paragraph 
+        my $text = <<TEXT;
+Beware the Computerwock, My son 
+    the bugs in bytes, the cards that patch 
+Beware the GIGO bird, and shun
+    the fumrirous bandersnatch 
+TEXT
+        # draw another box on the screen and add it to
+        # the test array
+        add_to_screen( 9, 10, \@expected, $text );
+        $term->_sample_text(9, 10, 2);
+        my @actual = $term->get_screen();
+
+        array_is(\@actual, \@expected, "got both paragraphs");
+        $term->push_screen();
+        $term->_show_stack(); # check for two stack frames
+        $term->pop_screen();  # get rid of frame 2
+        $term->pop_screen();  # get rid of frame 1
+
+        @actual = $term->get_screen();
+        array_is(\@actual, \@saved_screen, "saved screen was restored correctly");
+    };
+}
+
 sub array_is {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
@@ -330,7 +479,7 @@ sub add_to_screen {
     my $screen_ref = shift;
     my $image = shift;
 
-    my @seg = split( /[\n\r]+/, $image );
+    my @seg = split( /[\n\r]/, $image );
     
     # convert from 1-based to 0-based
     $x = $x - 1;
@@ -338,7 +487,8 @@ sub add_to_screen {
 
     foreach my $seg (@seg) {
         my $len = length($seg);
-        substr($$screen_ref[$y++], $x, $len) = $seg;
+        substr($$screen_ref[$y], $x, $len) = $seg if ($len > 0);
+        $y++;
     }
 }
 
