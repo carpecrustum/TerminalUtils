@@ -19,13 +19,13 @@ sub _show_stack {
      my $self = shift;
     my $frames = scalar(@{$self->{stack}});
     if ($frames == 0) {
-        print STDERR "\n# Stack is empty\n";
+        Test::More::diag( "Stack is empty" );
     }
     else {
-        print STDERR "\n# Stack has $frames frames.\n";
+        Test::More::diag( "Stack has $frames frames." );
         foreach my $f (1 .. $frames) {
             my $sf = JSON::decode_json($self->{stack}->[$f - 1]);
-            print STDERR "# ===================== Stack Frame #$f ==========================\n";
+            Test::More::diag( "===================== Stack Frame #$f ==========================" );
             my $last_line = 48;
             foreach my $row (reverse 1 .. 48) {
                 if ($sf->[$row -1] !~ /^ +$/) {
@@ -34,16 +34,16 @@ sub _show_stack {
                 }
             }
             foreach my $row (1 .. $last_line) {
-                printf STDERR "# [%2d] %s\n", $row, $sf->[$row - 1];
+                Test::More::diag( sprintf( "[%2d] %s\n", $row, $sf->[$row - 1] ));
             }
             if ($last_line != 48) {
-                print STDERR "\n";
+                Test::More::diag( "" );
                 $last_line++;
-                print STDERR "# Lines $last_line through 48 are blank\n";
-                print STDERR "\n";
+                Test::More::diag( "Lines $last_line through 48 are blank" );
+                Test::More::diag( "" );
             }
         }
-        print STDERR "# ==============================================================\n";
+        Test::More::diag( "==============================================================" );
     }
 }
 
