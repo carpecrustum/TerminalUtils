@@ -23,11 +23,11 @@ Origin (1, 1) is top left.
 
 =head1 VERSION
 
-Version 0.01
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 
 =head1 SYNOPSIS
@@ -498,6 +498,56 @@ sub pop_screen {
         }
     }
     return;
+}
+
+
+=head2 $self->picker( $headings, $list )
+
+Draws a scrollable list with headings as described in C<$headings>
+using the data in C<$list>.
+
+Parameters:
+    $headings : hashref of column names and widths
+    $data:      hashref of data to be displayed
+    $sortkey:   key into list and headings of sorted column
+=cut
+
+sub picker {
+    my $self = shift;
+    my $headings = shift;
+    my $data = shift;
+    my $sorter = shift;
+    my $up_down = shift;
+ 
+    $self->home();
+    $self->reset_screen();
+    $self->line("Orion Township Library", 39, 1);    
+    foreach my $column (keys %$headings ) {
+        my $text = ucfirst($column);
+        if ($column eq $sorter) {
+            $text .= "\N{BLACK DOWN-POINTING TRIANGLE}";
+        }
+        $self->line( $text, $headings->{$column}->{pos}, 2);
+    }
+    $self->line( "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100, 1, 3 );
+    
+    my $line = 4;
+    my @display_order = sort { $data->{$a}->{$sorter} cmp $data->{$b}->{$sorter} } keys %$data;
+    my $selected = $display_order[0];
+
+    foreach my $key (@display_order) {
+        foreach my $column (keys %$headings ) {
+            my $text = $data->{$key}->{$column};
+            if (($column eq "title") && exists($data->{$key}->{nfc})) {
+               $text = $data->{$key}->{nfc} . $text;
+            }
+            $self->line( $text, $headings->{$column}->{pos}, $line);
+        }
+        $line++;
+        last if ($line > 46);
+    } 
+    $self->line( "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100, 1, 47 );
+    return $selected;
 }
 
 
