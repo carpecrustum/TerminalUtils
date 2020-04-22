@@ -80,7 +80,7 @@ sub test_picker {
         my @expected = _blank_screen();
         add_to_screen(1, 1, \@expected, <<"TEXT");
                                       Orion Township Library
-    Title\N{BLACK DOWN-POINTING TRIANGLE}                             Author                             Call number
+    Title\N{BLACK UP-POINTING TRIANGLE}                             Author                             Call number
 $bar
     2001, A space odyssey              Clarke, Arthur C.                  823
     Imaginary numbers                  McGuire, Seanan                    813.6
@@ -96,7 +96,7 @@ TEXT
         my @expected = _blank_screen();
         add_to_screen(1, 1, \@expected, <<"TEXT");
                                       Orion Township Library
-    Title                              Author\N{BLACK DOWN-POINTING TRIANGLE}                            Call number
+    Title                              Author\N{BLACK UP-POINTING TRIANGLE}                            Call number
 $bar
     2001, A space odyssey              Clarke, Arthur C.                  823
     The moon is a harsh mistress       Heinlein, Robert A.                813.54
@@ -112,7 +112,7 @@ TEXT
         my @expected = _blank_screen();
         add_to_screen(1, 1, \@expected, <<"TEXT");
                                       Orion Township Library
-    Title                              Author                             Call number\N{BLACK DOWN-POINTING TRIANGLE}
+    Title                              Author                             Call number\N{BLACK UP-POINTING TRIANGLE}
 $bar
     The moon is a harsh mistress       Heinlein, Robert A.                813.54
     Imaginary numbers                  McGuire, Seanan                    813.6

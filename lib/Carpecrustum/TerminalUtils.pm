@@ -517,7 +517,7 @@ sub picker {
     my $headings = shift;
     my $data = shift;
     my $sorter = shift;
-    my $up_down = shift;
+    my $up_down = "up";
  
     $self->home();
     $self->reset_screen();
@@ -525,7 +525,12 @@ sub picker {
     foreach my $column (keys %$headings ) {
         my $text = ucfirst($column);
         if ($column eq $sorter) {
-            $text .= "\N{BLACK DOWN-POINTING TRIANGLE}";
+            if ($up_down eq "down") {
+                $text .= "\N{BLACK DOWN-POINTING TRIANGLE}";
+            }
+            else {
+                $text .= "\N{BLACK UP-POINTING TRIANGLE}";
+            }
         }
         $self->line( $text, $headings->{$column}->{pos}, 2);
     }
@@ -533,6 +538,9 @@ sub picker {
     
     my $line = 4;
     my @display_order = sort { $data->{$a}->{$sorter} cmp $data->{$b}->{$sorter} } keys %$data;
+    if ($up_down eq "down") {
+        @display_order = reverse @display_order;
+    }
     my $selected = $display_order[0];
 
     foreach my $key (@display_order) {
