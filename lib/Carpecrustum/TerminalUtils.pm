@@ -72,9 +72,23 @@ sub new {
     $self->{debug} = $debug;
     $self->{testing} = $filename =~ /\.t$/;
     $self->{stack} = [];
+    $self->{banner} = "";
     return $self;
 }
 
+
+=head2 $self->set_picker_banner($banner) 
+
+Sets the banner text used in the picker screens.
+
+=cut
+
+sub set_picker_banner {
+    my $self = shift;
+    my $banner = shift;
+    $self->{banner} = $banner;
+    return;
+}
 
 =head2 $self->is_test()
 
@@ -517,47 +531,97 @@ sub picker {
     my $headings = shift;
     my $data = shift;
     my $sorter = shift;
-    my $up_down = "up";
+    my $ascending = 1;
+
+    my %columns;
+    my $order = '1';
+    foreach my $column (sort { $headings->{$a}->{pos} <=> $headings->{$b}->{pos} } keys %$headings) {
+        $columns{$order++} = $column;
+    }
  
     $self->home();
     $self->reset_screen();
-    $self->line("Orion Township Library", 39, 1);    
-    foreach my $column (keys %$headings ) {
-        my $text = ucfirst($column);
-        if ($column eq $sorter) {
-            if ($up_down eq "down") {
-                $text .= "\N{BLACK DOWN-POINTING TRIANGLE}";
-            }
-            else {
-                $text .= "\N{BLACK UP-POINTING TRIANGLE}";
-            }
-        }
-        $self->line( $text, $headings->{$column}->{pos}, 2);
-    }
+    $self->line($self->{banner}, 50 - int(length($self->{banner})/2), 1);    
     $self->line( "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100, 1, 3 );
+    $self->line( "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100, 1, 47 );
+
+    $self->_draw_headings( $headings, $sorter, $ascending );
     
-    my $line = 4;
     my @display_order = sort { $data->{$a}->{$sorter} cmp $data->{$b}->{$sorter} } keys %$data;
-    if ($up_down eq "down") {
+    if (!$ascending) {
         @display_order = reverse @display_order;
     }
     my $selected = $display_order[0];
 
-    foreach my $key (@display_order) {
+    $self->_refresh_list($data, $headings, \@display_order);
+
+    while (my $keystroke = $self->get_key()) {
+        if (grep { $_ eq $keystroke } keys(%columns)) {
+            if ( $columns{$keystroke} eq $sorter ) {
+                # same column, so reverse direction
+                $ascending ^= 1;
+                @display_order = reverse @display_order;
+                $selected = $display_order[0];
+            }
+            else {
+                # pick new column
+                $sorter = $columns{$keystroke};
+                @display_order = sort { $data->{$a}->{$sorter} cmp $data->{$b}->{$sorter} } keys %$data;
+                $selected = $display_order[0];
+                $ascending = 1;
+            }
+            $self->_draw_headings( $headings, $sorter, $ascending );
+        }
+    $self->_refresh_list($data, $headings, \@display_order);
+    }
+
+    return $selected;
+}
+
+
+sub _refresh_list {
+    my $self = shift;
+    my $data = shift;
+    my $headings = shift;
+    my $keys_list = shift;
+
+    my $line = 4;
+    foreach my $key (@$keys_list) {
         foreach my $column (keys %$headings ) {
             my $text = $data->{$key}->{$column};
             if (($column eq "title") && exists($data->{$key}->{nfc})) {
                $text = $data->{$key}->{nfc} . $text;
             }
+            $self->line( " " x $headings->{$column}->{width}, $headings->{$column}->{pos}, $line);
             $self->line( $text, $headings->{$column}->{pos}, $line);
         }
         $line++;
         last if ($line > 46);
     } 
-    $self->line( "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100, 1, 47 );
-    return $selected;
+return;
 }
 
+sub _draw_headings {
+    my $self = shift;
+    my $headings = shift;
+    my $sorter = shift;
+    my $ascending = shift;
+    
+    foreach my $column (keys %$headings ) {
+        my $text = ucfirst($column);
+        if ($column eq $sorter) {
+            if ($ascending) {
+                $text .= "\N{BLACK UP-POINTING TRIANGLE}";
+            }
+            else {
+                $text .= "\N{BLACK DOWN-POINTING TRIANGLE}";
+            }
+        }
+        $self->line( " " x $headings->{$column}->{width}, $headings->{$column}->{pos}, 2);
+        $self->line( $text, $headings->{$column}->{pos}, 2);
+    }
+    
+}
 
 =head1 AUTHOR
 
