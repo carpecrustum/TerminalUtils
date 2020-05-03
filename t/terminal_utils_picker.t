@@ -64,6 +64,38 @@ sub run_tests {
 }
 
 
+sub _headings {
+    my $headings = {
+        title         => { width => 30, pos =>  5, },
+        author        => { width => 30, pos => 40, },
+        'call number' => { width => 20, pos => 75, }, 
+    };
+    return $headings;
+}
+
+sub _three_titles {
+    my $data = {
+        1 => {
+            nfc           => 'The ',
+            title         => 'moon is a harsh mistress',
+            author        => 'Heinlein, Robert A.',
+            'call number' => '813.54',
+        },
+        2 => {
+            title         => '2001, A space odyssey',
+            author        => 'Clarke, Arthur C.',
+            'call number' => '823',
+        },
+        3 => {
+            title         => 'Imaginary numbers',
+            author        => 'McGuire, Seanan',
+            'call number' => '813.6',
+        },
+    };
+    return $data;
+}
+
+
 sub test_sorting {
     return subtest sorting => sub {
         plan tests => 6;
@@ -71,30 +103,8 @@ sub test_sorting {
         my $term = Carpecrustum::TerminalUtilsTest->new();
         $term->set_picker_banner( 'Orion Township Library' );
        
-        my $headings = {
-            title         => { width => 30, pos =>  5, },
-            author        => { width => 30, pos => 40, },
-            'call number' => { width => 20, pos => 75, }, 
-        };
-
-        my $data = {
-            1 => {
-                nfc           => 'The ',
-                title         => 'moon is a harsh mistress',
-                author        => 'Heinlein, Robert A.',
-                'call number' => '813.54',
-            },
-            2 => {
-                title         => '2001, A space odyssey',
-                author        => 'Clarke, Arthur C.',
-                'call number' => '823',
-            },
-            3 => {
-                title         => 'Imaginary numbers',
-                author        => 'McGuire, Seanan',
-                'call number' => '813.6',
-            },
-        };
+        my $headings = _headings();
+        my $data = _three_titles();
 
         my $bar = "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100;
         my $selected = $term->picker($headings, $data, 'title');
@@ -157,30 +167,8 @@ sub test_change_sort_column {
         my $term = Carpecrustum::TerminalUtilsTest->new();
         $term->set_picker_banner("New Column Sorting Test");
        
-        my $headings = {
-            title         => { width => 30, pos =>  5, },
-            author        => { width => 30, pos => 40, },
-            'call number' => { width => 20, pos => 75, }, 
-        };
-
-        my $data = {
-            1 => {
-                nfc           => 'The ',
-                title         => 'moon is a harsh mistress',
-                author        => 'Heinlein, Robert A.',
-                'call number' => '813.54',
-            },
-            2 => {
-                title         => '2001, A space odyssey',
-                author        => 'Clarke, Arthur C.',
-                'call number' => '823',
-            },
-            3 => {
-                title         => 'Imaginary numbers',
-                author        => 'McGuire, Seanan',
-                'call number' => '813.6',
-            },
-        };
+        my $headings = _headings();
+        my $data = _three_titles();
 
         my $bar = "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100;
         my @keys = qw( 2 );
@@ -212,30 +200,8 @@ sub test_reverse_sorting {
         my $term = Carpecrustum::TerminalUtilsTest->new();
         $term->set_picker_banner("Reverse Sorting Test");
        
-        my $headings = {
-            title         => { width => 30, pos =>  5, },
-            author        => { width => 30, pos => 40, },
-            'call number' => { width => 20, pos => 75, }, 
-        };
-
-        my $data = {
-            1 => {
-                nfc           => 'The ',
-                title         => 'moon is a harsh mistress',
-                author        => 'Heinlein, Robert A.',
-                'call number' => '813.54',
-            },
-            2 => {
-                title         => '2001, A space odyssey',
-                author        => 'Clarke, Arthur C.',
-                'call number' => '823',
-            },
-            3 => {
-                title         => 'Imaginary numbers',
-                author        => 'McGuire, Seanan',
-                'call number' => '813.6',
-            },
-        };
+        my $headings = _headings();
+        my $data = _three_titles();
 
         my $bar = "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100;
         my @keys = qw( 2 2 RETURN );
@@ -267,30 +233,8 @@ sub test_picker {
         my $term = Carpecrustum::TerminalUtilsTest->new();
         $term->set_picker_banner( 'Lake Agassiz Public Library' );
        
-        my $headings = {
-            title         => { width => 30, pos =>  5, },
-            author        => { width => 30, pos => 40, },
-            'call number' => { width => 20, pos => 75, }, 
-        };
-
-        my $data = {
-            1 => {
-                nfc           => 'The ',
-                title         => 'moon is a harsh mistress',
-                author        => 'Heinlein, Robert A.',
-                'call number' => '813.54',
-            },
-            2 => {
-                title         => '2001, A space odyssey',
-                author        => 'Clarke, Arthur C.',
-                'call number' => '823',
-            },
-            3 => {
-                title         => 'Imaginary numbers',
-                author        => 'McGuire, Seanan',
-                'call number' => '813.6',
-            },
-        };
+        my $headings = _headings();
+        my $data = _three_titles();
 
         my $bar = "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100;
         
