@@ -2,7 +2,7 @@
 use strict;
 use utf8;
 use Devel::Symdump;
-use Test::More tests => 5;
+use Test::More tests => 7;
 use Test::MockModule;
 use Test::Deep;
 use Carp::Assert;
@@ -277,12 +277,52 @@ sub test_arrow_down {
 
         my @expected = _blank_screen();
         add_to_screen(1, 1, \@expected, <<"TEXT");
-                                       Reverse Sorting Test
-    Title                              Author\N{BLACK DOWN-POINTING TRIANGLE}                            Call number
+                                          Arrow Down Test
+    Title\N{BLACK UP-POINTING TRIANGLE}                             Author                             Call number
 $bar
-    Imaginary numbers                  McGuire, Seanan                    813.6
-    The moon is a harsh mistress       Heinlein, Robert A.                813.54
-    2001, A space odyssey              Clarke, Arthur C.                  823
+    3-D Starter Kit for Macintosh      Wagstaff, Sean                     006.6 WAGST
+    6502 software design               Scanlon, Leo J., 1941-             005.265 6502
+    Alone Against Tomorrow             Ellison, Harlan                    SF 813.54 ELLIS
+    Analog's Children of the futur     edited by Stanley Schmidt.         SC 813.54 Schmidt
+    Between planets;                   Heinlein, Robert A. (Robert An     SF 813.54 Heinlein
+    Bid time return                    Matheson, Richard, 1926-2013.      FIC 813.54 Matheson
+    Build your own Ajax web applic     Eernisse, Matthew.                 005.434 EERNI
+    Calculus :one and several vari     Salas, Saturnino L.                515 SALAS
+    Citizen of the galaxy              Heinlein, Robert A. (Robert An     SF 813.54 HEINL
+    Coils                              Zelazny, Roger.                    SF 813.54 ZELAZ
+    Cryptanalysis for microcompute     Foster, Caxton C., 1929-           652.8 FOSTE
+    The Door into Summer               Heinlein, Robert A. (Robert An     SF 813.54 HEINL
+    The Door into Summer               Heinlein, Robert A. (Robert An     SF 813.54 HEINL
+    Double star                        Heinlein, Robert A. (Robert An     SF 813.54 HEINL
+    Effects of enrichment problems     Ouellette, Hugh Francis.           372 Ouellette
+    Emergence                          Palmer, David R. 1941-             SF Palmer
+    Farmer in the sky                  Heinlein, Robert A. (Robert An     SF HEI
+    Father, Son & Co. : my life at     Watson, Thomas J., 1914-1993       338.7 WATSO
+    Handbook of mathematical table     Burington, Richard Stevens, 19     REF 510.212 BURIN
+    Hellstrom's hive                   Herbert, Frank.                    FIC 813.54 Herbert
+    Illusions : the adventures of      Bach, Richard.                     FIC 813.54 Bach
+    Ishmael                            Quinn, Daniel.                     FIC 813.54 Quinn
+    Jeb Stuart, the last cavalier.     Davis, Burke, 1913-                973.73 BURKE
+    Lord Foul's bane                   Donaldson, Stephen R.              FANTASY 813.54 DONAL
+    Lost continents; the Atlantis      De Camp, L. Sprague (Lyon Spra     398.23 DeCAMP
+    Managing the software process      Humphrey, Watts S., 1927-          005.1 HUMPH
+    Mapping time : the calendar an     Richards, E. G. (Edward Graham     529.3 RICHA
+    Microbe hunters                    De Kruif, Paul, 1890-1971.         589.900 DE KRU
+    My name is legion                  Zelazny, Roger.                    SF 813.54 Zelazny
+    A Name to Conjure With             Aamodt, Donald                     FANTASY 813.54 Aamod
+    Odyssey : Pepsi to Apple--a jo     Sculley, John.                     331.7 SCULL
+    Old Turtle                         Wood, Douglas, 1951-               E 813.54 WOOD
+    Owls in the family.                Mowat, Farley.                     FIC Mowat
+    The Pritcher Mass,                 Dickson, Gordon R.                 SF 813.54 Dickson
+    Probability and statistical in     Hogg, Robert V.                    519.2 HOGG
+    Something of value                 Ruark, Robert Chester, 1915-19     FIC 813.54 Ruark
+    Spellsinger : novel                Foster, Alan Dean, 1946-           FANTASY 813.54 FOSTE
+    Steve Jobs : the journey is th     Young, Jeffrey S., 1952-           338.7 YOUNG
+    Stranger in a strange land.        Heinlein, Robert A. (Robert An     SF 813.54 HEINL
+    Threshold                          Palmer, David R.                   SF 813.54 Palmer
+    UNIX in a Nutshell : system V      Gilly, Daniel                      005.432 GILLY
+    The Universe between.              Nourse, Alan E. (Alan Edward)      SF 813.52 Nourse
+    Up the line.                       Silverberg, Robert.                SF 813.54 SILVE
 TEXT
         add_to_screen(1, 47, \@expected, $bar);
         my @actual = $term->get_screen();

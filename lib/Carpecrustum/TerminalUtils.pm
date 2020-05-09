@@ -23,11 +23,11 @@ Origin (1, 1) is top left.
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 
 =head1 SYNOPSIS
@@ -592,6 +592,7 @@ sub _refresh_list {
             if (($column eq "title") && exists($data->{$key}->{nfc})) {
                $text = $data->{$key}->{nfc} . $text;
             }
+            $text = substr($text, 0, $headings->{$column}->{width});
             $self->line( " " x $headings->{$column}->{width}, $headings->{$column}->{pos}, $line);
             $self->line( $text, $headings->{$column}->{pos}, $line);
         }
