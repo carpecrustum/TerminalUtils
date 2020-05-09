@@ -64,38 +64,6 @@ sub run_tests {
 }
 
 
-sub _headings {
-    my $headings = {
-        title         => { width => 30, pos =>  5, },
-        author        => { width => 30, pos => 40, },
-        'call number' => { width => 20, pos => 75, }, 
-    };
-    return $headings;
-}
-
-sub _three_titles {
-    my $data = {
-        1 => {
-            nfc           => 'The ',
-            title         => 'moon is a harsh mistress',
-            author        => 'Heinlein, Robert A.',
-            'call number' => '813.54',
-        },
-        2 => {
-            title         => '2001, A space odyssey',
-            author        => 'Clarke, Arthur C.',
-            'call number' => '823',
-        },
-        3 => {
-            title         => 'Imaginary numbers',
-            author        => 'McGuire, Seanan',
-            'call number' => '813.6',
-        },
-    };
-    return $data;
-}
-
-
 sub test_sorting {
     return subtest sorting => sub {
         plan tests => 6;
@@ -291,6 +259,72 @@ TEXT
 }
 
 
+sub test_arrow_down {
+    return subtest arrow_down => sub {
+        plan tests => 2;
+
+        my $term = Carpecrustum::TerminalUtilsTest->new();
+        $term->set_picker_banner("Arrow Down Test");
+       
+        my $headings = _headings();
+        my $data = _fifty_titles();
+
+        my $bar = "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100;
+        my @keys = qw( DOWN_ARROW RETURN );
+        $term->set_keystrokes( \@keys );
+        my $selected = $term->picker($headings, $data, 'title');
+        is( $selected, 4, 'Picker returned 6502 software design' );
+
+        my @expected = _blank_screen();
+        add_to_screen(1, 1, \@expected, <<"TEXT");
+                                       Reverse Sorting Test
+    Title                              Author\N{BLACK DOWN-POINTING TRIANGLE}                            Call number
+$bar
+    Imaginary numbers                  McGuire, Seanan                    813.6
+    The moon is a harsh mistress       Heinlein, Robert A.                813.54
+    2001, A space odyssey              Clarke, Arthur C.                  823
+TEXT
+        add_to_screen(1, 47, \@expected, $bar);
+        my @actual = $term->get_screen();
+        array_is(\@actual, \@expected, "page is displayed in title order");
+ 
+    };
+}
+
+
+sub test_paging {
+    return subtest paging => sub {
+        plan tests => 2;
+
+        my $term = Carpecrustum::TerminalUtilsTest->new();
+        $term->set_picker_banner("Paging Test");
+       
+        my $headings = _headings();
+        my $data = _fifty_titles();
+
+        my $bar = "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100;
+        my @keys = qw( DOWN_ARROW DOWN_ARROW RETURN );
+        $term->set_keystrokes( \@keys );
+        my $selected = $term->picker($headings, $data, 'title');
+        is( $selected, 3, 'Picker returned Imaginary numbers' );
+
+        my @expected = _blank_screen();
+        add_to_screen(1, 1, \@expected, <<"TEXT");
+                                       Reverse Sorting Test
+    Title                              Author\N{BLACK DOWN-POINTING TRIANGLE}                            Call number
+$bar
+    Imaginary numbers                  McGuire, Seanan                    813.6
+    The moon is a harsh mistress       Heinlein, Robert A.                813.54
+    2001, A space odyssey              Clarke, Arthur C.                  823
+TEXT
+        add_to_screen(1, 47, \@expected, $bar);
+        my @actual = $term->get_screen();
+        array_is(\@actual, \@expected, "page is displayed in title order");
+ 
+    };
+}
+
+
 sub _blank_screen {
     my $row = ' ' x 100;
     my @screen;
@@ -389,5 +423,332 @@ sub add_to_screen {
     }
 }
 
+
+sub _headings {
+    my $headings = {
+        title         => { width => 30, pos =>  5, },
+        author        => { width => 30, pos => 40, },
+        'call number' => { width => 20, pos => 75, }, 
+    };
+    return $headings;
+}
+
+sub _three_titles {
+    my $data = {
+        1 => {
+            nfc           => 'The ',
+            title         => 'moon is a harsh mistress',
+            author        => 'Heinlein, Robert A.',
+            'call number' => '813.54',
+        },
+        2 => {
+            title         => '2001, A space odyssey',
+            author        => 'Clarke, Arthur C.',
+            'call number' => '823',
+        },
+        3 => {
+            title         => 'Imaginary numbers',
+            author        => 'McGuire, Seanan',
+            'call number' => '813.6',
+        },
+    };
+    return $data;
+}
+
+sub _fifty_titles {
+    my $data = {
+        1 => {
+           title => 'Ishmael',
+           author => 'Quinn, Daniel.',
+           'call number' => 'FIC 813.54 Quinn',
+        },
+        2 => {
+           title => 'Mapping time : the calendar and its history',
+           author => 'Richards, E. G. (Edward Graham)',
+           'call number' => '529.3 RICHA',
+        },
+        3 => {
+           title => 'Build your own Ajax web applications',
+           author => 'Eernisse, Matthew.',
+           'call number' => '005.434 EERNI',
+        },
+        4 => {
+           title => 'Effects of enrichment problems on attitude, problem solving ability and pattern recognition ability of prospective elementary school teachers',
+           author => 'Ouellette, Hugh Francis.',
+           'call number' => '372 Ouellette',
+        },
+        5 => {
+            nfc => 'A ',
+           title => 'Name to Conjure With',
+           author => 'Aamodt, Donald',
+           'call number' => 'FANTASY 813.54 Aamodt',
+        },
+        6 => {
+           title => 'Farmer in the sky',
+           author => 'Heinlein, Robert A. (Robert Anson), 1907-',
+           'call number' => 'SF HEI',
+        },
+        7 => {
+            nfc => 'The ',
+           title => 'Door into Summer',
+           author => 'Heinlein, Robert A. (Robert Anson), 1907-',
+           'call number' => 'SF 813.54 HEINL',
+        },
+        8 => {
+            nfc => 'The ',
+           title => 'Door into Summer',
+           author => 'Heinlein, Robert A. (Robert Anson), 1907-',
+           'call number' => 'SF 813.54 HEINL',
+        },
+        9 => {
+           title => 'Citizen of the galaxy',
+           author => 'Heinlein, Robert A. (Robert Anson), 1907-',
+           'call number' => 'SF 813.54 HEINL',
+        },
+        10 => {
+           title => 'Owls in the family.',
+           author => 'Mowat, Farley.',
+           'call number' => 'FIC Mowat',
+        },
+        11 => {
+           title => 'Alone Against Tomorrow',
+           author => 'Ellison, Harlan',
+           'call number' => 'SF 813.54 ELLIS',
+        },
+        12 => {
+           title => '3-D Starter Kit for Macintosh',
+           author => 'Wagstaff, Sean',
+           'call number' => '006.6 WAGST',
+        },
+        13 => {
+           title => 'Emergence',
+           author => 'Palmer, David R. 1941-',
+           'call number' => 'SF Palmer',
+        },
+        14 => {
+            nfc => 'A ',
+           title => 'trace of memory',
+           author => 'Laumer, Keith, 1925-',
+           'call number' => 'SF 813.54 Laumer',
+        },
+        15 => {
+           title => 'Up the line.',
+           author => 'Silverberg, Robert.',
+           'call number' => 'SF 813.54 SILVE',
+        },
+        16 => {
+           title => 'Old Turtle',
+           author => 'Wood, Douglas, 1951-',
+           'call number' => 'E 813.54 WOOD',
+        },
+        17 => {
+           title => 'Jeb Stuart, the last cavalier.',
+           author => 'Davis, Burke, 1913-',
+           'call number' => '973.73 BURKE',
+        },
+        18 => {
+           title => 'Managing the software process / by Watts S. Humphrey',
+           author => 'Humphrey, Watts S., 1927-',
+           'call number' => '005.1 HUMPH',
+        },
+        19 => {
+           title => 'Calculus :one and several variables, with analytic geometry',
+           author => 'Salas, Saturnino L.',
+           'call number' => '515 SALAS',
+        },
+        20 => {
+           title => 'Bid time return',
+           author => 'Matheson, Richard, 1926-2013.',
+           'call number' => 'FIC 813.54 Matheson',
+        },
+        21 => {
+            nfc => 'The ',
+           title => "whole Internet user's guide & catalog",
+           author => 'Krol, Ed.',
+           'call number' => '384.3 KROL',
+        },
+        22 => {
+           title => 'Probability and statistical inference',
+           author => 'Hogg, Robert V.',
+           'call number' => '519.2 HOGG',
+        },
+        23 => {
+           title => 'Threshold',
+           author => 'Palmer, David R.',
+           'call number' => 'SF 813.54 Palmer',
+        },
+        24 => {
+           title => 'My name is legion',
+           author => 'Zelazny, Roger.',
+           'call number' => 'SF 813.54 Zelazny',
+        },
+        25 => {
+           title => 'Voyagers in time; twelve stories of science fiction.',
+           author => 'Silverberg, Robert.',
+           'call number' => 'SC 813.54 Silverberg',
+        },
+        26 => {
+            nfc => 'The ',
+           title => 'Pritcher Mass,',
+           author => 'Dickson, Gordon R.',
+           'call number' => 'SF 813.54 Dickson',
+        },
+        27 => {
+           title => "Lord Foul's bane",
+           author => 'Donaldson, Stephen R.',
+           'call number' => 'FANTASY 813.54 DONAL',
+        },
+        28 => {
+            nfc => 'The ',
+           title => 'illearth war',
+           author => 'Donaldson, Stephen R.',
+           'call number' => 'FANTASY 813.54 DONAL',
+        },
+        29 => {
+            nfc => 'The ',
+           title => 'power that preserves',
+           author => 'Donaldson, Stephen R.',
+           'call number' => 'FANTASY 813.54 DONAL',
+        },
+        30 => {
+            nfc => 'The ',
+           title => 'power that preserves',
+           author => 'Donaldson, Stephen R.',
+           'call number' => 'FANTASY 813.54 DONAL',
+        },
+        31 => {
+            nfc => 'The ',
+           title => 'wounded land',
+           author => 'Donaldson, Stephen R.',
+           'call number' => 'FANTASY 813.54 DONAL',
+        },
+        32 => {
+            nfc => 'The ',
+           title => 'wounded land',
+           author => 'Donaldson, Stephen R.',
+           'call number' => 'FANTASY 813.54 DONAL',
+        },
+        33 => {
+           title => 'Spellsinger : novel',
+           author => 'Foster, Alan Dean, 1946-',
+           'call number' => 'FANTASY 813.54 FOSTE',
+        },
+        34 => {
+           title => 'Double star',
+           author => 'Heinlein, Robert A. (Robert Anson), 1907-',
+           'call number' => 'SF 813.54 HEINL',
+        },
+        35 => {
+           title => "Hellstrom's hive",
+           author => 'Herbert, Frank.',
+           'call number' => 'FIC 813.54 Herbert',
+        },
+        36 => {
+            nfc => 'The ',
+           title => 'defiant agents,',
+           author => 'Norton, Andre.',
+           'call number' => 'SF 813.54 Norton',
+        },
+        37 => {
+           title => 'Coils',
+           author => 'Zelazny, Roger.',
+           'call number' => 'SF 813.54 ZELAZ',
+        },
+        38 => {
+           title => 'Stranger in a strange land.',
+           author => 'Heinlein, Robert A. (Robert Anson), 1907-1988.',
+           'call number' => 'SF 813.54 HEINL',
+        },
+        39 => {
+           title => "Analog's Children of the future",
+           author => 'edited by Stanley Schmidt.',
+           'call number' => 'SC 813.54 Schmidt',
+        },
+        40 => {
+           title => 'Cryptanalysis for microcomputers',
+           author => 'Foster, Caxton C., 1929-',
+           'call number' => '652.8 FOSTE',
+        },
+        41 => {
+           title => 'Father, Son & Co. : my life at IBM and beyond',
+           author => 'Watson, Thomas J., 1914-1993',
+           'call number' => '338.7 WATSO',
+        },
+        42 => {
+           title => 'Odyssey : Pepsi to Apple--a journey of adventure, ideas, and the future',
+           author => 'Sculley, John.',
+           'call number' => '331.7 SCULL',
+        },
+        43 => {
+           title => 'Handbook of mathematical tables and formulas.',
+           author => 'Burington, Richard Stevens, 1901-',
+           'call number' => 'REF 510.212 BURIN',
+        },
+        44 => {
+           title => 'Virus! : the secret world of computer invaders that breed and destroy',
+           author => 'Lundell, Allan.',
+           'call number' => '005.8 LUNDE',
+        },
+        45 => {
+            nfc => 'The ',
+           title => 'time traders',
+           author => 'Norton, Andre.',
+           'call number' => 'SF 813.54 Norton',
+        },
+        46 => {
+           title => 'Between planets;',
+           author => 'Heinlein, Robert A. (Robert Anson), 1907-1988.',
+           'call number' => 'SF 813.54 Heinlein',
+        },
+        47 => {
+           title => 'Microbe hunters',
+           author => 'De Kruif, Paul, 1890-1971.',
+           'call number' => '589.900 DE KRU',
+        },
+        48 => {
+           title => 'Lost continents; the Atlantis theme',
+           author => 'De Camp, L. Sprague (Lyon Sprague), 1907-',
+           'call number' => '398.23 DeCAMP',
+        },
+        49 => {
+            nfc => 'The ',
+           title => 'ship that sailed the time stream.',
+           author => 'Edmondson, G. C.',
+           'call number' => 'SF 813.54 Edmondson',
+        },
+        50 => {
+           title => 'UNIX in a Nutshell : system V edition :',
+           author => 'Gilly, Daniel',
+           'call number' => '005.432 GILLY',
+        },
+        51 => {
+           title => '6502 software design',
+           author => 'Scanlon, Leo J., 1941-',
+           'call number' => '005.265 6502',
+        },
+        52 => {
+            nfc => 'The ',
+           title => 'Universe between.',
+           author => 'Nourse, Alan E. (Alan Edward)',
+           'call number' => 'SF 813.52 Nourse',
+        },
+        53 => {
+           title => 'Illusions : the adventures of a reluctant messiah',
+           author => 'Bach, Richard.',
+           'call number' => 'FIC 813.54 Bach',
+        },
+        54 => {
+           title => 'Steve Jobs : the journey is the reward',
+           author => 'Young, Jeffrey S., 1952-',
+           'call number' => '338.7 YOUNG',
+        },
+        55 => {
+           title => 'Something of value',
+           author => 'Ruark, Robert Chester, 1915-1965.',
+           'call number' => 'FIC 813.54 Ruark',
+        },
+    };
+    return $data;
+}
 
 
