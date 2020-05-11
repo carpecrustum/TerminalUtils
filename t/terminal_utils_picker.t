@@ -273,7 +273,7 @@ sub test_arrow_down {
         my @keys = qw( DOWN_ARROW RETURN );
         $term->set_keystrokes( \@keys );
         my $selected = $term->picker($headings, $data, 'title');
-        is( $selected, 4, 'Picker returned 6502 software design' );
+        is( $selected, 51, 'Picker returned 6502 software design' );
 
         my @expected = _blank_screen();
         add_to_screen(1, 1, \@expected, <<"TEXT");
@@ -334,7 +334,7 @@ TEXT
 
 sub test_paging {
     return subtest paging => sub {
-        plan tests => 2;
+        plan tests => 1;
 
         my $term = Carpecrustum::TerminalUtilsTest->new();
         $term->set_picker_banner("Paging Test");
@@ -343,24 +343,10 @@ sub test_paging {
         my $data = _fifty_titles();
 
         my $bar = "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100;
-        my @keys = qw( DOWN_ARROW DOWN_ARROW RETURN );
+        my @keys = qw( UP_ARROW DOWN_ARROW DOWN_ARROW RETURN );
         $term->set_keystrokes( \@keys );
         my $selected = $term->picker($headings, $data, 'title');
-        is( $selected, 3, 'Picker returned Imaginary numbers' );
-
-        my @expected = _blank_screen();
-        add_to_screen(1, 1, \@expected, <<"TEXT");
-                                       Reverse Sorting Test
-    Title                              Author\N{BLACK DOWN-POINTING TRIANGLE}                            Call number
-$bar
-    Imaginary numbers                  McGuire, Seanan                    813.6
-    The moon is a harsh mistress       Heinlein, Robert A.                813.54
-    2001, A space odyssey              Clarke, Arthur C.                  823
-TEXT
-        add_to_screen(1, 47, \@expected, $bar);
-        my @actual = $term->get_screen();
-        array_is(\@actual, \@expected, "page is displayed in title order");
- 
+        is( $selected, 11, 'Picker returned Alone against tomorrow' );
     };
 }
 

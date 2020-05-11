@@ -23,11 +23,11 @@ Origin (1, 1) is top left.
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 
 =head1 SYNOPSIS
@@ -551,7 +551,7 @@ sub picker {
     if (!$ascending) {
         @display_order = reverse @display_order;
     }
-    my $selected = $display_order[0];
+    my $position = 0;
 
     $self->_refresh_list($data, $headings, \@display_order);
 
@@ -561,21 +561,25 @@ sub picker {
                 # same column, so reverse direction
                 $ascending ^= 1;
                 @display_order = reverse @display_order;
-                $selected = $display_order[0];
             }
             else {
                 # pick new column
                 $sorter = $columns{$keystroke};
                 @display_order = sort { $data->{$a}->{$sorter} cmp $data->{$b}->{$sorter} } keys %$data;
-                $selected = $display_order[0];
                 $ascending = 1;
             }
             $self->_draw_headings( $headings, $sorter, $ascending );
         }
+        elsif (($keystroke eq "UP_ARROW") && ($position > 0)) {
+            $position--;
+        }
+        elsif ($keystroke eq "DOWN_ARROW") {
+            $position++;
+        }
     $self->_refresh_list($data, $headings, \@display_order);
     }
 
-    return $selected;
+    return $display_order[$position];
 }
 
 
