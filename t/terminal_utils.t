@@ -349,7 +349,7 @@ sub test_push_pop {
         plan tests => 4;
         my $term = Carpecrustum::TerminalUtilsTest->new();
        
-        $term->_show_stack(); 
+        # $term->_show_stack();
         # popping an empty stack returns a blank screen
         $term->_sample_text( 2, 2, 0);
         $term->_sample_text( 2, 5, 1);
@@ -378,7 +378,7 @@ TEXT
         # stash the current screen for the next result
         my @saved_screen = $term->get_screen();
     
-        $term->_show_stack(); 
+        # $term->_show_stack();
 
         # add another paragraph 
         my $text = <<TEXT;
@@ -395,7 +395,7 @@ TEXT
 
         array_is(\@actual, \@expected, "got both paragraphs");
         $term->push_screen();
-        $term->_show_stack(); # check for two stack frames
+        # $term->_show_stack(); # check for two stack frames
         $term->pop_screen();  # get rid of frame 2
         $term->pop_screen();  # get rid of frame 1
 
