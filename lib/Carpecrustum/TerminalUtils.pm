@@ -571,8 +571,14 @@ sub picker {
             }
             $self->_draw_headings( $headings, $sorter, $ascending );
         }
-        elsif (($keystroke eq "UP_ARROW") && ($position > 0)) {
-            $position--;
+        elsif ($keystroke eq "UP_ARROW") {
+            if (($page_offset > 0) || (($page_offset == 0) && ($position > 0))) {
+                $position--;
+                if ($position < 0) {
+                    $position += 42;
+                    $page_offset -= 42;
+                }
+            }
         }
         elsif ($keystroke eq "DOWN_ARROW") {
             $position++;
