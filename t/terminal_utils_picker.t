@@ -291,6 +291,7 @@ $bar
     Citizen of the galaxy              Heinlein, Robert A. (Robert An     SF 813.54 HEINL
     Coils                              Zelazny, Roger.                    SF 813.54 ZELAZ
     Cryptanalysis for microcompute     Foster, Caxton C., 1929-           652.8 FOSTE
+    The defiant agents,                Norton, Andre.                     SF 813.54 Norton
     The Door into Summer               Heinlein, Robert A. (Robert An     SF 813.54 HEINL
     The Door into Summer               Heinlein, Robert A. (Robert An     SF 813.54 HEINL
     Double star                        Heinlein, Robert A. (Robert An     SF 813.54 HEINL
@@ -300,9 +301,11 @@ $bar
     Father, Son & Co. : my life at     Watson, Thomas J., 1914-1993       338.7 WATSO
     Handbook of mathematical table     Burington, Richard Stevens, 19     REF 510.212 BURIN
     Hellstrom's hive                   Herbert, Frank.                    FIC 813.54 Herbert
+    The illearth war                   Donaldson, Stephen R.              FANTASY 813.54 DONAL
     Illusions : the adventures of      Bach, Richard.                     FIC 813.54 Bach
     Ishmael                            Quinn, Daniel.                     FIC 813.54 Quinn
     Jeb Stuart, the last cavalier.     Davis, Burke, 1913-                973.73 BURKE
+    Juggling for the complete klut     Cassidy, John                      793.87 Cassidy
     Lord Foul's bane                   Donaldson, Stephen R.              FANTASY 813.54 DONAL
     Lost continents; the Atlantis      De Camp, L. Sprague (Lyon Spra     398.23 DeCAMP
     Managing the software process      Humphrey, Watts S., 1927-          005.1 HUMPH
@@ -313,17 +316,15 @@ $bar
     Odyssey : Pepsi to Apple--a jo     Sculley, John.                     331.7 SCULL
     Old Turtle                         Wood, Douglas, 1951-               E 813.54 WOOD
     Owls in the family.                Mowat, Farley.                     FIC Mowat
+    The power that preserves           Donaldson, Stephen R.              FANTASY 813.54 DONAL
+    The power that preserves           Donaldson, Stephen R.              FANTASY 813.54 DONAL
     The Pritcher Mass,                 Dickson, Gordon R.                 SF 813.54 Dickson
     Probability and statistical in     Hogg, Robert V.                    519.2 HOGG
+    The ship that sailed the time      Edmondson, G. C.                   SF 813.54 Edmondson
     Something of value                 Ruark, Robert Chester, 1915-19     FIC 813.54 Ruark
     Spellsinger : novel                Foster, Alan Dean, 1946-           FANTASY 813.54 FOSTE
-    Steve Jobs : the journey is th     Young, Jeffrey S., 1952-           338.7 YOUNG
-    Stranger in a strange land.        Heinlein, Robert A. (Robert An     SF 813.54 HEINL
-    Threshold                          Palmer, David R.                   SF 813.54 Palmer
-    UNIX in a Nutshell : system V      Gilly, Daniel                      005.432 GILLY
-    The Universe between.              Nourse, Alan E. (Alan Edward)      SF 813.52 Nourse
-    Up the line.                       Silverberg, Robert.                SF 813.54 SILVE
 TEXT
+
         add_to_screen(1, 47, \@expected, $bar);
         my @actual = $term->get_screen();
         array_is(\@actual, \@expected, "page is displayed in title order");
@@ -334,7 +335,7 @@ TEXT
 
 sub test_paging {
     return subtest paging => sub {
-        plan tests => 1;
+        plan tests => 2;
 
         my $term = Carpecrustum::TerminalUtilsTest->new();
         $term->set_picker_banner("Paging Test");
@@ -343,20 +344,44 @@ sub test_paging {
         my $data = _fifty_titles();
 
         my $bar = "\N{BOX DRAWINGS HEAVY HORIZONTAL}" x 100;
-        my @keys = qw( UP_ARROW DOWN_ARROW DOWN_ARROW RETURN );
+        my @keys = ( 'DOWN_ARROW' ) x 53;
+        push @keys, 'RETURN';
+
         $term->set_keystrokes( \@keys );
         my $selected = $term->picker($headings, $data, 'title');
-        is( $selected, 11, 'Picker returned Alone against tomorrow' );
+        is( $selected, 44, 'Picker returned Virus!' );
+
+        my @expected = _blank_screen();
+        add_to_screen(1, 1, \@expected, <<"TEXT");
+                                            Paging Test
+    Title\N{BLACK UP-POINTING TRIANGLE}                             Author                             Call number
+$bar
+    Spellsinger : novel                Foster, Alan Dean, 1946-           FANTASY 813.54 FOSTE
+    Steve Jobs : the journey is th     Young, Jeffrey S., 1952-           338.7 YOUNG
+    Stranger in a strange land.        Heinlein, Robert A. (Robert An     SF 813.54 HEINL
+    Threshold                          Palmer, David R.                   SF 813.54 Palmer
+    The time traders                   Norton, Andre.                     SF 813.54 Norton
+    A trace of memory                  Laumer, Keith, 1925-               SF 813.54 Laumer
+    The Universe between.              Nourse, Alan E. (Alan Edward)      SF 813.52 Nourse
+    UNIX in a Nutshell : system V      Gilly, Daniel                      005.432 GILLY
+    Up the line.                       Silverberg, Robert.                SF 813.54 SILVE
+    Virus! : the secret world of c     Lundell, Allan.                    005.8 LUNDE
+    Voyagers in time; twelve stori     Silverberg, Robert.                SC 813.54 Silverberg
+    The whole Internet user's guid     Krol, Ed.                          384.3 KROL
+    The wounded land                   Donaldson, Stephen R.              FANTASY 813.54 DONAL
+    The wounded land                   Donaldson, Stephen R.              FANTASY 813.54 DONAL
+TEXT
+    add_to_screen(1, 47, \@expected, $bar);
+        my @actual = $term->get_screen();
+        array_is(\@actual, \@expected, "page is displayed in title order");
+    
     };
 }
 
 
 sub _blank_screen {
     my $row = ' ' x 100;
-    my @screen;
-    foreach my $i ( 1 .. 48 ) {
-        push @screen, $row;
-    }
+    my @screen = ($row) x 48; 
     return @screen;
 }
 
@@ -772,6 +797,11 @@ sub _fifty_titles {
            title => 'Something of value',
            author => 'Ruark, Robert Chester, 1915-1965.',
            'call number' => 'FIC 813.54 Ruark',
+        },
+        56 => {
+            title => 'Juggling for the complete klutz',
+            author => 'Cassidy, John',
+            'call number' => '793.87 Cassidy',
         },
     };
     return $data;

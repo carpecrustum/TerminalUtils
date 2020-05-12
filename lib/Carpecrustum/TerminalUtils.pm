@@ -547,13 +547,14 @@ sub picker {
 
     $self->_draw_headings( $headings, $sorter, $ascending );
     
-    my @display_order = sort { $data->{$a}->{$sorter} cmp $data->{$b}->{$sorter} } keys %$data;
+    my @display_order = sort { uc($data->{$a}->{$sorter}) cmp uc($data->{$b}->{$sorter}) } keys %$data;
     if (!$ascending) {
         @display_order = reverse @display_order;
     }
     my $position = 0;
+    my $page_offset = 0;
 
-    $self->_refresh_list($data, $headings, \@display_order);
+    $self->_refresh_list($data, $headings, \@display_order, $page_offset);
 
     while (my $keystroke = $self->get_key()) {
         if (grep { $_ eq $keystroke } keys(%columns)) {
@@ -565,7 +566,7 @@ sub picker {
             else {
                 # pick new column
                 $sorter = $columns{$keystroke};
-                @display_order = sort { $data->{$a}->{$sorter} cmp $data->{$b}->{$sorter} } keys %$data;
+                @display_order = sort { uc($data->{$a}->{$sorter}) cmp uc($data->{$b}->{$sorter}) } keys %$data;
                 $ascending = 1;
             }
             $self->_draw_headings( $headings, $sorter, $ascending );
@@ -575,11 +576,15 @@ sub picker {
         }
         elsif ($keystroke eq "DOWN_ARROW") {
             $position++;
+            if ($position > 44) {
+                $page_offset += 42;
+                $position = 1;
+            }
         }
-    $self->_refresh_list($data, $headings, \@display_order);
+    $self->_refresh_list($data, $headings, \@display_order, $page_offset);
     }
 
-    return $display_order[$position];
+    return $display_order[$page_offset + $position];
 }
 
 
@@ -588,17 +593,21 @@ sub _refresh_list {
     my $data = shift;
     my $headings = shift;
     my $keys_list = shift;
+    my $page_offset = shift;
 
     my $line = 4;
-    foreach my $key (@$keys_list) {
+    foreach my $i (0 .. 42) {
+        my $key = $keys_list->[$i + $page_offset];
         foreach my $column (keys %$headings ) {
-            my $text = $data->{$key}->{$column};
-            if (($column eq "title") && exists($data->{$key}->{nfc})) {
-               $text = $data->{$key}->{nfc} . $text;
-            }
-            $text = substr($text, 0, $headings->{$column}->{width});
             $self->line( " " x $headings->{$column}->{width}, $headings->{$column}->{pos}, $line);
-            $self->line( $text, $headings->{$column}->{pos}, $line);
+            if ($key) {
+                my $text = $data->{$key}->{$column};
+                if (($column eq "title") && exists($data->{$key}->{nfc})) {
+                   $text = $data->{$key}->{nfc} . $text;
+                }
+                $text = substr($text, 0, $headings->{$column}->{width});
+                $self->line( $text, $headings->{$column}->{pos}, $line);
+            }
         }
         $line++;
         last if ($line > 46);
